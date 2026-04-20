@@ -51,7 +51,7 @@ router.post(('/login'), async (req, res) => {
             return res.status(400).json({ msg: 'All fields is required' })
         }
 
-        const is_exist = await UserModel.findOne({ phone: phone });
+        const is_exist = await userModel.findOne({ phone: phone });
 
         if (!is_exist) {
             return res.status(404).json({ msg: "User Not Exist" });
