@@ -1,8 +1,16 @@
+require("dotenv").config();
 const express = require("express");
 const userModel = require('../ModeL/UserModel');
 const router = express.Router();
 const MessageModel = require("../ModeL/Message");
 const bcrypt = require('bcryptjs');
+const jwttoken = require('jsonwebtoken');
+
+
+
+
+const SECRET_KEY = process.env.SECRET_KEY;
+
 
 
 //Register new user 
@@ -24,7 +32,7 @@ router.post(('/register'), async (req, res) => {
         const SaltRound = 10;
         const newPass = await bcrypt.hash(password, SaltRound);
 
-        const newUser = new userModel({ name, phone, email, password:newPass });
+        const newUser = new userModel({ name, phone, email, password: newPass });
         await newUser.save();
         return res.status(200).json({ msg: "Registered successfully !" });
 
@@ -35,7 +43,34 @@ router.post(('/register'), async (req, res) => {
 
 
 //login api
+router.post(('/login'), async (req, res) => {
+    try {
+        const { phone, password } = req.body;
 
+        if (!phone || !password) {
+            return res.status(400).json({ msg: 'All fields is required' })
+        }
+
+        const is_exist = await UserModel.findOne({ phone: phone });
+
+        if (!is_exist) {
+            return res.status(404).json({ msg: "User Not Exist" });
+        }
+
+        //check user password is valid or not
+        const is_valid_password = await bcrypt.compare(password, is_exist.password);
+
+        if (!is_valid_password) {
+            return res.status(401).json({ msg: 'Invalid creadential' })
+        }
+
+        const new_jwt = jwttoken.sign({phone:is_exist.phone}, SECRET_KEY, {expiresIn:"365d"});
+        return res.status(200).json({token:new_jwt});
+
+    } catch (error) {
+        console.error(`Error from the login user and error is the ${error}`)
+    }
+})
 
 
 //get old messages 
