@@ -2,6 +2,8 @@ const express = require("express");
 const userModel = require('../ModeL/UserModel');
 const router = express.Router();
 const MessageModel = require("../ModeL/Message");
+const bcrypt = require('bcryptjs');
+
 
 //Register new user 
 router.post(('/register'), async (req, res) => {
@@ -19,7 +21,10 @@ router.post(('/register'), async (req, res) => {
             return res.status(409).json({ msg: "User allready registered !" });
         }
 
-        const newUser = new userModel({ name, phone, email, password });
+        const SaltRound = 10;
+        const newPass = await bcrypt.hash(password, SaltRound);
+
+        const newUser = new userModel({ name, phone, email, password:newPass });
         await newUser.save();
         return res.status(200).json({ msg: "Registered successfully !" });
 
@@ -27,6 +32,10 @@ router.post(('/register'), async (req, res) => {
         console.error(`Errpor from the register new user and error is the ${error}`)
     }
 })
+
+
+//login api
+
 
 
 //get old messages 
