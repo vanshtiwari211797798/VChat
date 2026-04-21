@@ -106,7 +106,7 @@ router.post(('/add-contact'), async (req, res) => {
         }
 
         //check that contact phone number is valid mins registered on the VChat
-        $check_valid_phone = await userModel.findOne({phone:phone});
+        $check_valid_phone = await userModel.findOne({phone:contact_phone});
 
         if(!$check_valid_phone){
             return res.status(409).json({msg:"User is not using the VChat, Please Refer"})
@@ -116,7 +116,7 @@ router.post(('/add-contact'), async (req, res) => {
         //if user is exist then 
         const new_contact_add = new contactModel({phone, contact_phone, name});
         await new_contact_add.save();
-        return res.status(201).json({msg:'Contact Saved Successfully !'});
+        return res.status(201).json({msg:'Contact Saved Successfully !'})
 
     } catch (error) {
         console.error(`Error from the add new contact ${error}`)
