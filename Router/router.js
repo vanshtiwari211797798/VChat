@@ -96,4 +96,32 @@ router.get(('/get-message/:sender_id/:receiver_id'), async (req, res) => {
     }
 })
 
+//add to the contact api
+router.post(('/add-contact'), async (req, res) => {
+    try {
+        const {phone, contact_phone, name} = req.body;
+
+        if(!phone || !contact_phone || !name){
+            return res.status(400).json({msg:"All fields is required !"})
+        }
+
+        //check that contact phone number is valid mins registered on the VChat
+        $check_valid_phone = await userModel.findOne({phone:phone});
+
+        if(!$check_valid_phone){
+            return res.status(409).json({msg:"User is not using the VChat, Please Refer"})
+        }
+
+
+        //if user is exist then 
+        const new_contact_add = new contactModel({phone, contact_phone, name});
+        await new_contact_add.save();
+        return res.status(201).json({msg:'Contact Saved Successfully !'});
+
+    } catch (error) {
+        console.error(`Error from the add new contact ${error}`)
+        return res.status(500).json({msg:"Internal Server Error"});
+    }
+})
+
 module.exports = router;
