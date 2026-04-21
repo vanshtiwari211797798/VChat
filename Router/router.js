@@ -65,7 +65,7 @@ router.post(('/login'), async (req, res) => {
         }
 
         const new_jwt = jwttoken.sign({ phone: is_exist.phone }, SECRET_KEY, { expiresIn: "365d" });
-        return res.status(200).json({ token: new_jwt, user_id:phone });
+        return res.status(200).json({ token: new_jwt, user_id: phone });
 
     } catch (error) {
         console.error(`Error from the login user and error is the ${error}`)
@@ -127,6 +127,29 @@ router.post(('/add-contact'), async (req, res) => {
     } catch (error) {
         console.error(`Error from the add new contact ${error}`)
         return res.status(500).json({ msg: "Internal Server Error" });
+    }
+})
+
+
+//get all contact list
+router.get(('/get-contact-lists/:token'), async (req, res) => {
+    try {
+        const token = req.params.token;
+
+        if (!token) {
+            return res.status(400).json({ msg: 'All fields is required' });
+        }
+
+        const getDetails = await contactModel.find({ phone: token });
+
+        if (getDetails.length === 0) {
+            return res.status(404).json({ msg: "No contacts found" });
+        }
+
+        return res.status(200).json({ data: getDetails })
+
+    } catch (error) {
+        console.error('error from the creatong get contact users and error is the ' + error)
     }
 })
 
