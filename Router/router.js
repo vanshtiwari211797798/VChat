@@ -65,7 +65,7 @@ router.post(('/login'), async (req, res) => {
         }
 
         const new_jwt = jwttoken.sign({ phone: is_exist.phone }, SECRET_KEY, { expiresIn: "365d" });
-        return res.status(200).json({ token: new_jwt });
+        return res.status(200).json({ token: new_jwt, user_id:phone });
 
     } catch (error) {
         console.error(`Error from the login user and error is the ${error}`)
