@@ -64,8 +64,8 @@ router.post(('/login'), async (req, res) => {
             return res.status(401).json({ msg: 'Invalid creadential' })
         }
 
-        const new_jwt = jwttoken.sign({phone:is_exist.phone}, SECRET_KEY, {expiresIn:"365d"});
-        return res.status(200).json({token:new_jwt});
+        const new_jwt = jwttoken.sign({ phone: is_exist.phone }, SECRET_KEY, { expiresIn: "365d" });
+        return res.status(200).json({ token: new_jwt });
 
     } catch (error) {
         console.error(`Error from the login user and error is the ${error}`)
@@ -99,28 +99,34 @@ router.get(('/get-message/:sender_id/:receiver_id'), async (req, res) => {
 //add to the contact api
 router.post(('/add-contact'), async (req, res) => {
     try {
-        const {phone, contact_phone, name} = req.body;
+        const { phone, contact_phone, name } = req.body;
 
-        if(!phone || !contact_phone || !name){
-            return res.status(400).json({msg:"All fields is required !"})
+        if (!phone || !contact_phone || !name) {
+            return res.status(400).json({ msg: "All fields is required !" })
         }
 
         //check that contact phone number is valid mins registered on the VChat
-        $check_valid_phone = await userModel.findOne({phone:contact_phone});
+        const check_valid_phone = await userModel.findOne({ phone: contact_phone });
 
-        if(!$check_valid_phone){
-            return res.status(409).json({msg:"User is not using the VChat, Please Refer"})
+        if (!check_valid_phone) {
+            return res.status(409).json({ msg: "User is not using the VChat, Please Refer" })
         }
 
 
+        //check that user allready added the contact
+        const check_allready_contact = await contactModel.findOne({ phone: phone, contact_phone: contact_phone });
+        if (check_allready_contact) {
+            return res.status(409).json({ msg: "Allready in the contact" })
+        }
+
         //if user is exist then 
-        const new_contact_add = new contactModel({phone, contact_phone, name});
+        const new_contact_add = new contactModel({ phone, contact_phone, name });
         await new_contact_add.save();
-        return res.status(201).json({msg:'Contact Saved Successfully !'})
+        return res.status(201).json({ msg: 'Contact Saved Successfully !' })
 
     } catch (error) {
         console.error(`Error from the add new contact ${error}`)
-        return res.status(500).json({msg:"Internal Server Error"});
+        return res.status(500).json({ msg: "Internal Server Error" });
     }
 })
 
